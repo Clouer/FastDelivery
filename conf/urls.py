@@ -12,13 +12,3 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('ordered/', views.OrderedView.as_view(), name='ordered'),
 ]
-
-"""
-– / для главной страницы
-– /cart/ для корзины
-– /account/ для личного кабинета
-– /auth/ для аутентификации
-– /register/ для регистрации
-– /logout/ для выхода
-– /ordered/ для подтверждения отправки
-"""
