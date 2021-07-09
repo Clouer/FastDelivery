@@ -1,7 +1,30 @@
-from django.shortcuts import render
+from django.contrib.auth.views import LoginView
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 
-from delivery.models import MealCategory
+from delivery import forms
+from delivery.models import MealCategory, User
+from delivery.scripts import add_meal
+
+
+class MyLoginView(LoginView):
+    redirect_authenticated_user = True
+    template_name = 'delivery/login.html'
+
+
+class MySignUpView(View):
+    def get(self, request):
+        return render(request, 'delivery/register.html', context={
+            'form': forms.SignUpForm
+        })
+
+    def post(self, request):
+        form = forms.SignUpForm(request.POST)
+        if form.is_valid():
+            cleaned_form = form.cleaned_data
+            User.objects.create_user(cleaned_form['username'], password=cleaned_form['password'])
+            return redirect(reverse('login'))
 
 
 class MainView(View):
@@ -12,32 +35,29 @@ class MainView(View):
             main_page_menu.update({category: category_meals})
 
         return render(request, 'delivery/main.html', context={
-            'menu': main_page_menu
+            'user': request.user,
+            'menu': main_page_menu,
         })
+
+    def post(self, request):
+        meal_id = request.POST['meal']
+        add_meal(request, meal_id)
+        return redirect(reverse('cart'))
 
 
 class CartView(View):
     def get(self, request):
         return render(request, 'delivery/cart.html')
 
+    def post(self, request):
+        meal_id = request.POST['id']
+        del request.session['cart'][meal_id]
+        return redirect(reverse('cart'))
+
 
 class AccountView(View):
     def get(self, request):
         return render(request, 'delivery/account.html')
-
-
-class AuthView(View):
-    def get(self, request):
-        return render(request, 'delivery/auth.html')
-
-
-class RegisterView(View):
-    def get(self, request):
-        return render(request, 'delivery/register.html')
-
-
-class LogoutView(View):
-    pass
 
 
 class OrderedView(View):
