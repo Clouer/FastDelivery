@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.views import View
 
 from delivery import forms
-from delivery.models import MealCategory, User
-from delivery.scripts import add_meal
+from delivery.models import MealCategory, User, Order
+from delivery.scripts import add_meal, get_cart_menu
 
 
 class MyLoginView(LoginView):
@@ -62,4 +62,22 @@ class AccountView(View):
 
 class OrderedView(View):
     def get(self, request):
+        return redirect(reverse('main'))
+
+    def post(self, request):
+        form = request.POST
+        cart = get_cart_menu(request)
+        order = Order.objects.create(
+            price=form['total'],
+            status='new',
+            email=form['email'],
+            phone=form['phone'],
+            address=form['address'],
+            client_id=request.user.id
+        )
+        for meal in cart:
+            order.meals.add(meal[0])
+
+        request.session['cart'] = {}
+
         return render(request, 'delivery/ordered.html')

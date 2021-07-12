@@ -8,7 +8,7 @@ os.environ["DJANGO_SETTINGS_MODULE"] = 'conf.settings'
 django.setup()  # Всякие Django штуки импортим после сетапа
 
 from delivery import models
-from delivery.models import MealCategory, Meal
+from delivery.models import MealCategory, Meal, Order
 
 if __name__ == '__main__':
     pass
